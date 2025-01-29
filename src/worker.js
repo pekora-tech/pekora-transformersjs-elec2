@@ -11,11 +11,18 @@ import {
 class TextGenerationPipeline {
   static model_id = "onnx-community/Llama-3.2-1B-Instruct-q4f16";
   static deepseek_model_id = "onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX";
+  static phi_model_id = "onnx-community/Phi-3.5-mini-instruct-onnx-web";
   static current_model_id = TextGenerationPipeline.model_id;
 
   static async getInstance(progress_callback = null, model_type = "llama") {
     // Set current model based on type
-    this.current_model_id = model_type === "deepseek" ? this.deepseek_model_id : this.model_id;
+    if (model_type === "phi") {
+      this.current_model_id = this.phi_model_id;
+    } else if (model_type === "deepseek") {
+      this.current_model_id = this.deepseek_model_id;
+    } else {
+      this.current_model_id = this.model_id;
+    }
     try {
       this.tokenizer ??= AutoTokenizer.from_pretrained(this.current_model_id, {
         progress_callback,
@@ -42,6 +49,7 @@ class TextGenerationPipeline {
       this.model ??= AutoModelForCausalLM.from_pretrained(this.current_model_id, {
         dtype: "q4f16",
         device: "webgpu",
+        use_external_data_format: model_type === "phi",
         progress_callback,
       });
 
@@ -55,9 +63,9 @@ class TextGenerationPipeline {
 
 const stopping_criteria = new InterruptableStoppingCriteria();
 
-async function generate(messages) {
+async function generate(messages, model_type) {
   // Retrieve the text-generation pipeline.
-  const [tokenizer, model] = await TextGenerationPipeline.getInstance();
+  const [tokenizer, model] = await TextGenerationPipeline.getInstance(null, model_type);
 
   const inputs = tokenizer.apply_chat_template(messages, {
     add_generation_prompt: true,
@@ -99,7 +107,9 @@ async function generate(messages) {
     // past_key_values: past_key_values_cache,
 
     // Sampling
-    do_sample: false,
+    do_sample: model_type === "phi",
+    top_k: model_type === "phi" ? 3 : undefined,
+    temperature: model_type === "phi" ? 0.2 : undefined,
 
     max_new_tokens: 1024,
     streamer,
@@ -187,7 +197,7 @@ self.addEventListener("message", async (e) => {
 
     case "generate":
       stopping_criteria.reset();
-      generate(data);
+      generate(data, model_type);
       break;
 
     case "interrupt":

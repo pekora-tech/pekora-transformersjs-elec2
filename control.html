@@ -126,6 +126,7 @@
             <select id="modelSelect">
                 <option value="llama">Llama 3.2 (1.1b)</option>
                 <option value="deepseek">DeepSeek R1 (1.5b)</option>
+                <option value="phi">Phi-3.5 (3.82b)</option>
             </select>
         </div>
         <div class="button-group">
@@ -145,7 +146,9 @@
         function updateLogoImage() {
             const logoImage = document.getElementById('logoImage');
             const modelType = modelSelect.value;
-            logoImage.src = modelType === 'deepseek' ? 'public/logo-deepseek.png' : 'public/logo.png';
+            logoImage.src = modelType === 'phi' ? 'public/logo-phi.png' : 
+                          modelType === 'deepseek' ? 'public/logo-deepseek.png' : 
+                          'public/logo.png';
         }
 
         // Check if Node.js is installed
