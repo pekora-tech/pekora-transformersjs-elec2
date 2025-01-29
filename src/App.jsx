@@ -195,7 +195,7 @@ function App() {
         <div className="h-full overflow-auto scrollbar-thin flex justify-center items-center flex-col relative">
           <div className="flex flex-col items-center mb-1 max-w-[340px] text-center">
             <img
-              src="logo.png"
+              src={isDeepSeek ? "logo-deepseek.png" : "logo.png"}
               width="75%"
               height="auto"
               className="block"
@@ -242,7 +242,7 @@ function App() {
               to a server. You can even disconnect from the internet after the
               model has loaded!
               <br />
-              Want to learn more? Check out the demo's source code on{" "}
+              Want to learn more? Check out the demo&apos;s source code on{" "}
               <a
                 href={isDeepSeek
                   ? "https://github.com/huggingface/transformers.js-examples/tree/main/deepseek-r1-webgpu"

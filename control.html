@@ -115,7 +115,7 @@
     </style>
 </head>
 <body>
-    <img src="public/logo.png" alt="Logo" class="logo" />
+    <img src="public/logo.png" alt="Logo" class="logo" id="logoImage" />
     <div class="container">
         <h1>WebGPU Model Service Control</h1>
         <div id="serverStatus" class="status running">
@@ -141,6 +141,12 @@
         const openBtn = document.getElementById('openBrowser');
         const statusDiv = document.getElementById('serverStatus');
         const modelSelect = document.getElementById('modelSelect');
+
+        function updateLogoImage() {
+            const logoImage = document.getElementById('logoImage');
+            const modelType = modelSelect.value;
+            logoImage.src = modelType === 'deepseek' ? 'public/logo-deepseek.png' : 'public/logo.png';
+        }
 
         // Check if Node.js is installed
         function checkNodeJS() {
@@ -170,6 +176,7 @@
         // Initial state
         let isServerRunning = checkNodeJS();
         updateButtons();
+        updateLogoImage(); // Set initial logo
 
         function updateButtons() {
             startBtn.disabled = isServerRunning;
@@ -208,6 +215,9 @@
                 window.open('http://localhost:5178', '_blank', 'width=650,height=900');
             }
         });
+
+        // Add model select change listener
+        modelSelect.addEventListener('change', updateLogoImage);
 
         // Listen for server status updates
         ipcRenderer.on('server-status', (event, running) => {
