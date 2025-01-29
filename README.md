@@ -1,4 +1,4 @@
-# Llama 3.2 WebGPU Desktop Service
+# WebGPU Desktop Service
 
 A desktop application built with Electron that provides a convenient interface for running the Llama 3.2 WebGPU service. This project is based on [transformers.js-examples](https://github.com/huggingface/transformers.js-examples) by Hugging Face.
 
@@ -14,10 +14,10 @@ A desktop application built with Electron that provides a convenient interface f
 ## Screenshots
 
 Control Interface:
-
+![](./doc/llama3.2-electron.png)
 
 Browser Interface:
-
+![](./doc/llama3.2-electron2.png)
 
 ## System Requirements
 
@@ -99,7 +99,7 @@ This will:
 
 ```bash
 npm run build
-npm run make
+npm run package
 ```
 
 Packaged application will be in the `out` directory.
