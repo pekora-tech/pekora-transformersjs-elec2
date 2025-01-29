@@ -20,6 +20,12 @@ export default {
       name: '@electron-forge/maker-rpm',
       config: {},
     },
+    {
+      name: '@electron-forge/maker-dmg',
+      config: {
+        format: 'ULFO'
+      }
+    }
   ],
   plugins: [
     {
