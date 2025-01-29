@@ -1,5 +1,5 @@
 {
-  "name": "llama-3.2-webgpu",
+  "name": "transformers-webgpu",
   "private": true,
   "version": "0.0.0",
   "type": "module",

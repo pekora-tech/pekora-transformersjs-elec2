@@ -10,10 +10,14 @@ import {
  */
 class TextGenerationPipeline {
   static model_id = "onnx-community/Llama-3.2-1B-Instruct-q4f16";
+  static deepseek_model_id = "onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX";
+  static current_model_id = TextGenerationPipeline.model_id;
 
-  static async getInstance(progress_callback = null) {
+  static async getInstance(progress_callback = null, model_type = "llama") {
+    // Set current model based on type
+    this.current_model_id = model_type === "deepseek" ? this.deepseek_model_id : this.model_id;
     try {
-      this.tokenizer ??= AutoTokenizer.from_pretrained(this.model_id, {
+      this.tokenizer ??= AutoTokenizer.from_pretrained(this.current_model_id, {
         progress_callback,
       });
 
@@ -35,7 +39,7 @@ class TextGenerationPipeline {
 
       console.log("Loading model using GPU adapter with preference:", adapter ? "high-performance" : "low-power");
 
-      this.model ??= AutoModelForCausalLM.from_pretrained(this.model_id, {
+      this.model ??= AutoModelForCausalLM.from_pretrained(this.current_model_id, {
         dtype: "q4f16",
         device: "webgpu",
         progress_callback,
@@ -144,7 +148,7 @@ async function check() {
   }
 }
 
-async function load() {
+async function load(model_type = "llama") {
   self.postMessage({
     status: "loading",
     data: "Loading model...",
@@ -155,7 +159,7 @@ async function load() {
     // We also add a progress callback to the pipeline so that we can
     // track model loading.
     self.postMessage(x);
-  });
+  }, model_type);
 
   self.postMessage({
     status: "loading",
@@ -170,7 +174,7 @@ async function load() {
 
 // Listen for messages from the main thread
 self.addEventListener("message", async (e) => {
-  const { type, data } = e.data;
+  const { type, data, model_type } = e.data;
 
   switch (type) {
     case "check":
@@ -178,7 +182,7 @@ self.addEventListener("message", async (e) => {
       break;
 
     case "load":
-      load();
+      load(model_type);
       break;
 
     case "generate":

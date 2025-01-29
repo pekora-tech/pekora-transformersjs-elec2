@@ -186,18 +186,23 @@ function App() {
     }
   }, [messages, isRunning]);
 
+  const modelType = import.meta.env.VITE_MODEL_TYPE || "llama";
+  const isDeepSeek = modelType === "deepseek";
+
   return IS_WEBGPU_AVAILABLE ? (
     <div className="flex flex-col h-screen mx-auto items justify-end text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900">
       {status === null && messages.length === 0 && (
         <div className="h-full overflow-auto scrollbar-thin flex justify-center items-center flex-col relative">
           <div className="flex flex-col items-center mb-1 max-w-[340px] text-center">
             <img
-              src="logo.png"
+              src={isDeepSeek ? "logo-deepseek.png" : "logo.png"}
               width="75%"
               height="auto"
               className="block"
             ></img>
-            <h1 className="text-4xl font-bold mb-1">Llama-3.2 WebGPU</h1>
+            <h1 className="text-4xl font-bold mb-1">
+              {isDeepSeek ? "DeepSeek R1" : "Llama 3.2"} WebGPU
+            </h1>
             <h2 className="font-semibold">
               A private and powerful AI chatbot <br />
               that runs locally in your browser.
@@ -209,16 +214,19 @@ function App() {
               <br />
               You are about to load{" "}
               <a
-                href="https://huggingface.co/onnx-community/Llama-3.2-1B-Instruct-q4f16"
+                href={isDeepSeek 
+                  ? "https://huggingface.co/onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX"
+                  : "https://huggingface.co/onnx-community/Llama-3.2-1B-Instruct-q4f16"}
                 target="_blank"
                 rel="noreferrer"
                 className="font-medium underline"
               >
-                Llama-3.2-1B-Instruct
+                {isDeepSeek ? "DeepSeek R1" : "Llama 3.2"}
               </a>
-              , a 1.24 billion parameter LLM that is optimized for inference on
-              the web. Once downloaded, the model (1.15&nbsp;GB) will be cached
-              and reused when you revisit the page.
+              {isDeepSeek 
+                ? ", a 1.5B parameter reasoning LLM optimized for in-browser inference."
+                : ", a 1.24 billion parameter LLM that is optimized for inference on the web."}
+              {!isDeepSeek && " Once downloaded, the model (1.15&nbsp;GB) will be cached and reused when you revisit the page."}
               <br />
               <br />
               Everything runs directly in your browser using{" "}
@@ -234,9 +242,11 @@ function App() {
               to a server. You can even disconnect from the internet after the
               model has loaded!
               <br />
-              Want to learn more? Check out the demo s source code on{" "}
+              Want to learn more? Check out the demo&apos;s source code on{" "}
               <a
-                href="https://github.com/huggingface/transformers.js-examples/tree/main/llama-3.2-webgpu"
+                href={isDeepSeek
+                  ? "https://github.com/huggingface/transformers.js-examples/tree/main/deepseek-r1-webgpu"
+                  : "https://github.com/huggingface/transformers.js-examples/tree/main/llama-3.2-webgpu"}
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
@@ -258,7 +268,10 @@ function App() {
             <button
               className="border px-4 py-2 rounded-lg bg-blue-400 text-white hover:bg-blue-500 disabled:bg-blue-100 disabled:cursor-not-allowed select-none"
               onClick={() => {
-                worker.current.postMessage({ type: "load" });
+                worker.current.postMessage({ 
+                  type: "load",
+                  model_type: modelType
+                });
                 setStatus("loading");
               }}
               disabled={status !== null || error !== null}

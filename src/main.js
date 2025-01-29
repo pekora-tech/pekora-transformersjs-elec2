@@ -14,7 +14,7 @@ let viteProcess = null;
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 480,
+    height: 600,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -30,13 +30,18 @@ const sendServerStatus = (status) => {
   }
 };
 
-const startViteServer = () => {
+const startViteServer = (modelType = 'llama') => {
   if (viteProcess) return;
   
+  // Pass model type as environment variable
   viteProcess = spawn('npm', ['run', 'dev'], {
     shell: true,
     stdio: 'ignore',
-    windowsHide: true
+    windowsHide: true,
+    env: {
+      ...process.env,
+      VITE_MODEL_TYPE: modelType
+    }
   });
   
   // 等待vite服務器啟動
@@ -82,8 +87,8 @@ const createTray = () => {
 };
 
 // IPC Handlers
-ipcMain.handle('start-server', async () => {
-  await startViteServer();
+ipcMain.handle('start-server', async (event, modelType) => {
+  await startViteServer(modelType);
 });
 
 ipcMain.handle('stop-server', () => {
@@ -91,7 +96,7 @@ ipcMain.handle('stop-server', () => {
 });
 
 app.whenReady().then(async () => {
-  await startViteServer();
+  await startViteServer('llama'); // Default to llama model
   createTray();
   createWindow();
 });
