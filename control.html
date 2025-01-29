@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Llama 3.2 WebGPU Service Control</title>
+    <title>WebGPU Model Service Control</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,14 +96,37 @@
             border-top-color: transparent;
             animation: spin 1s linear infinite;
         }
+
+        .model-select {
+            margin: 20px 0;
+        }
+        .model-select label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .model-select select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: white;
+        }
     </style>
 </head>
 <body>
     <img src="public/logo.png" alt="Logo" class="logo" />
     <div class="container">
-        <h1>Llama 3.2 WebGPU Service Control</h1>
+        <h1>WebGPU Model Service Control</h1>
         <div id="serverStatus" class="status running">
             Server Status: Running
+        </div>
+        <div class="model-select">
+            <label>Select Model:</label>
+            <select id="modelSelect">
+                <option value="llama">Llama 3.2 (1.1GB)</option>
+                <option value="deepseek">DeepSeek R1 (1.5GB)</option>
+            </select>
         </div>
         <div class="button-group">
             <button id="startServer" class="start">Start Server</button>
@@ -117,6 +140,7 @@
         const stopBtn = document.getElementById('stopServer');
         const openBtn = document.getElementById('openBrowser');
         const statusDiv = document.getElementById('serverStatus');
+        const modelSelect = document.getElementById('modelSelect');
 
         // Check if Node.js is installed
         function checkNodeJS() {
@@ -151,6 +175,7 @@
             startBtn.disabled = isServerRunning;
             stopBtn.disabled = !isServerRunning;
             openBtn.disabled = !isServerRunning;
+            modelSelect.disabled = isServerRunning;
             statusDiv.className = isServerRunning ? 'status running' : 'status stopped';
             statusDiv.textContent = `Server Status: ${isServerRunning ? 'Running' : 'Stopped'}`;
         }
@@ -162,7 +187,8 @@
             startBtn.disabled = true;
             startBtn.classList.add('loading');
             try {
-                await ipcRenderer.invoke('start-server');
+                const modelType = modelSelect.value;
+                await ipcRenderer.invoke('start-server', modelType);
                 isServerRunning = true;
             } finally {
                 startBtn.classList.remove('loading');

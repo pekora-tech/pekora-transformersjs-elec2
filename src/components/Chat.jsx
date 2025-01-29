@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 
 import BotIcon from "./icons/BotIcon";
 import UserIcon from "./icons/UserIcon";
+import BrainIcon from "./icons/BrainIcon";
 
 import "./Chat.css";
 import { useEffect } from "react";
@@ -29,8 +30,12 @@ export default function Chat({ messages }) {
           <div key={`message-${i}`} className="flex items-start space-x-4">
             {msg.role === "assistant" ? (
               <>
-                <BotIcon className="h-6 w-6 min-h-6 min-w-6 my-3 text-gray-500 dark:text-gray-300" />
-                <div className="bg-gray-200 dark:bg-gray-700 rounded-lg p-4">
+                {msg.answerIndex === undefined ? (
+                  <BrainIcon className="h-6 w-6 min-h-6 min-w-6 my-3 text-gray-500 dark:text-gray-300" />
+                ) : (
+                  <BotIcon className="h-6 w-6 min-h-6 min-w-6 my-3 text-gray-500 dark:text-gray-300" />
+                )}
+                <div className={`${msg.answerIndex === undefined ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-gray-200 dark:bg-gray-700'} rounded-lg p-4`}>
                   <p className="min-h-6 text-gray-800 dark:text-gray-200 overflow-wrap-anywhere">
                     {msg.content.length > 0 ? (
                       <span
