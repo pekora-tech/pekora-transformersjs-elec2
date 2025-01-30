@@ -62,7 +62,11 @@ const killViteServer = () => {
 };
 
 const createTray = () => {
-  tray = new Tray(join(__dirname, '../public/logo.png'));
+  const modelType = process.env.VITE_MODEL_TYPE || 'llama';
+  const logoPath = modelType === 'phi' ? '../public/logo-phi.png' : 
+                   modelType === 'deepseek' ? '../public/logo-deepseek.png' : 
+                   '../public/logo.png';
+  tray = new Tray(join(__dirname, logoPath));
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '開啟控制介面',
@@ -82,7 +86,10 @@ const createTray = () => {
       }
     }
   ]);
-  tray.setToolTip('Llama 3.2 WebGPU Service');
+  const tooltipText = modelType === 'phi' ? 'Phi-3.5 WebGPU Service' :
+                     modelType === 'deepseek' ? 'DeepSeek R1 WebGPU Service' :
+                     'Llama 3.2 WebGPU Service';
+  tray.setToolTip(tooltipText);
   tray.setContextMenu(contextMenu);
 };
 
