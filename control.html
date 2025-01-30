@@ -133,6 +133,8 @@
             <button id="startServer" class="start">Start Server</button>
             <button id="stopServer" class="stop">Stop Server</button>
             <button id="openBrowser">Open in Browser</button>
+            <!--<button id="openBuiltinBrowser">Open Built-in Browser</button>-->
+            <button id="checkWebGPU">Check WebGPU Support</button>
             <!--<button id="checkGPU">Check GPU Status</button>-->
         </div>
     </div>
@@ -220,6 +222,14 @@
             if (isServerRunning) {
                 shell.openExternal('http://localhost:5178');
             }
+        });
+
+        document.getElementById('openBuiltinBrowser').addEventListener('click', () => {
+            ipcRenderer.invoke('open-browser');
+        });
+
+        document.getElementById('checkWebGPU').addEventListener('click', () => {
+            shell.openExternal('https://webgpu.github.io/webgpu-samples/');
         });
 
         document.getElementById('checkGPU').addEventListener('click', () => {

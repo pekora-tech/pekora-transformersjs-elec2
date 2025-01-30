@@ -4,12 +4,26 @@ import { dirname, join } from 'path';
 import { spawn } from 'child_process';
 import treeKill from 'tree-kill';
 
+// 強制使用GPU
+app.commandLine.appendSwitch('ignore-gpu-blacklist');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('enable-unsafe-webgpu');
+app.commandLine.appendSwitch('enable-features', 'Vulkan,UseSkiaRenderer');
+app.commandLine.appendSwitch('use-angle', 'gl');
+app.commandLine.appendSwitch('use-gl', 'desktop');
+app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('enable-native-gpu-memory-buffers');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 let mainWindow = null;
 let tray = null;
 let viteProcess = null;
+
+let browserWindow = null;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -18,13 +32,64 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webgl: true,
+      enableWebGL: true,
       webGPU: {
         defaultPerformanceMode: 'high'
       }
-    }
+    },
+    backgroundColor: '#ffffff',
+    // 強制使用硬體加速
+    accelerator: 'gpu'
+  });
+
+  // 強制啟用硬體加速
+  mainWindow.webContents.setFrameRate(60);
+  mainWindow.webContents.on('dom-ready', () => {
+    mainWindow.webContents.send('gpu-status', {
+      gpuInfo: app.getGPUInfo('complete')
+    });
   });
 
   mainWindow.loadFile('control.html');
+};
+
+const openBrowser = () => {
+  if (browserWindow) {
+    browserWindow.focus();
+    return;
+  }
+  
+  browserWindow = new BrowserWindow({
+    width: 1024,
+    height: 768,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webgl: true,
+      enableWebGL: true,
+      webGPU: {
+        defaultPerformanceMode: 'high'
+      }
+    },
+    backgroundColor: '#ffffff',
+    // 強制使用硬體加速
+    accelerator: 'gpu'
+  });
+
+  // 強制啟用硬體加速
+  browserWindow.webContents.setFrameRate(60);
+  browserWindow.webContents.on('dom-ready', () => {
+    browserWindow.webContents.send('gpu-status', {
+      gpuInfo: app.getGPUInfo('complete')
+    });
+  });
+  
+  browserWindow.loadURL('https://webglreport.com/');
+  
+  browserWindow.on('closed', () => {
+    browserWindow = null;
+  });
 };
 
 const sendServerStatus = (status) => {
@@ -97,6 +162,10 @@ const createTray = () => {
 };
 
 // IPC Handlers
+ipcMain.handle('open-browser', () => {
+  openBrowser();
+});
+
 ipcMain.handle('start-server', async (event, modelType) => {
   await startViteServer(modelType);
 });
