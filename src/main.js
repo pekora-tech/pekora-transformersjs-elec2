@@ -17,7 +17,10 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webGPU: {
+        defaultPerformanceMode: 'high'
+      }
     }
   });
 
