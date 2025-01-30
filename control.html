@@ -133,10 +133,13 @@
             <button id="startServer" class="start">Start Server</button>
             <button id="stopServer" class="stop">Stop Server</button>
             <button id="openBrowser">Open in Browser</button>
+            <button id="checkGPU">Check GPU Status</button>
         </div>
     </div>
     <script>
         const { ipcRenderer, shell } = require('electron');
+        const { exec } = require('child_process');
+        const os = require('os');
         const startBtn = document.getElementById('startServer');
         const stopBtn = document.getElementById('stopServer');
         const openBtn = document.getElementById('openBrowser');
@@ -216,6 +219,41 @@
         openBtn.addEventListener('click', () => {
             if (isServerRunning) {
                 shell.openExternal('http://localhost:5178');
+            }
+        });
+
+        document.getElementById('checkGPU').addEventListener('click', () => {
+            const platform = os.platform();
+            const isWindows = platform === 'win32';
+            const isMac = platform === 'darwin';
+            
+            const openChromeGPU = () => {
+                setTimeout(() => {
+                    shell.openExternal('chrome://gpu');
+                }, 1000); // 等待 Chrome 啟動
+            };
+
+            if (isWindows) {
+                // Windows: 啟動 Chrome
+                exec('start chrome', (error) => {
+                    if (error) {
+                        console.error('無法啟動 Chrome:', error);
+                        return;
+                    }
+                    openChromeGPU();
+                });
+            } else if (isMac) {
+                // macOS: 啟動 Chrome
+                exec('open -a "Google Chrome"', (error) => {
+                    if (error) {
+                        console.error('無法啟動 Chrome:', error);
+                        return;
+                    }
+                    openChromeGPU();
+                });
+            } else {
+                // 其他系統直接嘗試打開
+                shell.openExternal('chrome://gpu');
             }
         });
 
